@@ -3,6 +3,7 @@ import { connectMongo, isObjectId } from "@/lib/server/db";
 import Post from "@/lib/server/models/post.model";
 import { updatePostById as updateLocalPostById } from "@/lib/server/storage/localStore";
 import { sendBrevoEmail } from "@/lib/server/brevo";
+import { notifyUser } from "@/lib/server/notificationsHub";
 
 export async function PATCH(req) {
   try {
@@ -61,6 +62,14 @@ export async function PATCH(req) {
         console.warn("Status update email failed:", error.message);
       }
     }
+
+    notifyUser(String(post.createdUser?._id), {
+      postId: String(post._id),
+      status,
+      title: post.title,
+      message: `Issue ${post.title} is now ${status}`,
+      at: new Date().toISOString(),
+    });
 
     return NextResponse.json(
       { success: true, message: "Status updated successfully", data: post },

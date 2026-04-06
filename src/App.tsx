@@ -9,6 +9,7 @@ import { AboutPage } from './components/AboutPage';
 import { ContactPage } from './components/ContactPage';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './components/AuthContext';
+import { NotificationProvider } from './components/NotificationContext';
 import { Toaster } from 'sonner';
 
 function AppContent() {
@@ -49,8 +50,10 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppContent />
-        <Toaster richColors position="top-right" />
+        <NotificationProvider>
+          <AppContent />
+          <Toaster richColors position="top-right" />
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );

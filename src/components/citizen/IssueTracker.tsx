@@ -6,7 +6,7 @@ import { Progress } from '../ui/progress';
 import { Search, Calendar, MapPin, AlertCircle } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { api } from '../../lib/api';
-import { toast } from 'sonner';
+import { useNotifications } from '../NotificationContext';
 
 const statusConfig = {
   Pending: { color: 'bg-gray-500', label: 'Submitted', textColor: 'text-gray-100', progress: 10 },
@@ -19,7 +19,7 @@ export function IssueTracker() {
   const [searchQuery, setSearchQuery] = useState('');
   const [issues, setIssues] = useState<any[]>([]);
   const { userId } = useAuth();
-  const [notifications, setNotifications] = useState<Array<{ id: string; message: string; at: string }>>([]);
+  const { notifications, markRead } = useNotifications();
 
   useEffect(() => {
     const cacheKey = userId ? `issue_tracker_cache_${userId}` : '';
@@ -38,26 +38,11 @@ export function IssueTracker() {
       }
     }
 
-    const fetchIssues = async (silent = false) => {
+    const fetchIssues = async () => {
       try {
         const response = await api.get('/api/getposts');
         if (response.data.success) {
           const userIssues = response.data.posts.filter((post: any) => post.createdUser?._id === userId);
-
-          if (silent && issues.length > 0) {
-            const previousById = new Map(issues.map((item) => [String(item._id), item.status]));
-            const changed = userIssues.filter((post: any) => previousById.has(String(post._id)) && previousById.get(String(post._id)) !== post.status);
-            if (changed.length > 0) {
-              const nextNotifications = changed.map((post: any) => ({
-                id: String(post._id),
-                message: `Issue #${String(post._id).slice(-4)} is now ${post.status}`,
-                at: new Date().toLocaleTimeString(),
-              }));
-              setNotifications((prev) => [...nextNotifications, ...prev].slice(0, 8));
-              nextNotifications.forEach((n) => toast.success(n.message));
-            }
-          }
-
           setIssues(userIssues);
           if (cacheKey) {
             localStorage.setItem(cacheKey, JSON.stringify(userIssues));
@@ -70,7 +55,7 @@ export function IssueTracker() {
 
     if (userId) {
       fetchIssues();
-      const interval = setInterval(() => fetchIssues(true), 10000);
+      const interval = setInterval(() => fetchIssues(), 15000);
       return () => clearInterval(interval);
     }
   }, [userId]);
@@ -103,9 +88,14 @@ export function IssueTracker() {
           <CardContent>
             <div className="space-y-2">
               {notifications.map((n, index) => (
-                <div key={`${n.id}-${index}`} className="rounded-md border px-3 py-2 text-sm flex justify-between">
+                <div
+                  key={`${n.id}-${index}`}
+                  className={`rounded-md border px-3 py-2 text-sm flex justify-between cursor-pointer ${n.read ? 'opacity-70' : ''}`}
+                  onClick={() => markRead(n.id)}
+                  title="Mark as read"
+                >
                   <span>{n.message}</span>
-                  <span className="text-muted-foreground">{n.at}</span>
+                  <span className="text-muted-foreground">{new Date(n.at).toLocaleTimeString()}</span>
                 </div>
               ))}
             </div>

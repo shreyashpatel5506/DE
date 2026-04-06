@@ -8,10 +8,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../AuthContext';
 import { api } from '../../lib/api';
 const authorizedEmails = [
-  'admin@city.gov',
-  'infrastructure@city.gov',
-  'maintenance@city.gov',
-  'public.works@city.gov'
+  'admin@gmail.com'
 ];
 
 export function OfficerLogin() {
@@ -39,8 +36,7 @@ export function OfficerLogin() {
       const response = await api.post('/api/auth/loginOfficer', { email, password });
       if (response.data.success) {
         toast.success('Login successful!');
-        // Note: Currently the backend JWT decode checks for { id } instead of { _id }, handle accordingly
-        loginOfficer({ _id: response.data.token, email }); 
+        loginOfficer(response.data.officer || { _id: response.data.token, email }); 
       } else {
         toast.error(response.data.message || 'Login failed');
       }
