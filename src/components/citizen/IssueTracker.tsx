@@ -7,6 +7,7 @@ import { Search, Calendar, MapPin, AlertCircle } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { api } from '../../lib/api';
 import { useNotifications } from '../NotificationContext';
+import { StatusTimeline } from '../shared/StatusTimeline';
 
 const statusConfig = {
   Pending: { color: 'bg-gray-500', label: 'Submitted', textColor: 'text-gray-100', progress: 10 },
@@ -65,17 +66,6 @@ export function IssueTracker() {
     issue._id.includes(searchQuery) ||
     issue.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const getStatusSteps = (status: string = "Pending") => {
-    const steps = ['Pending', 'Verified', 'In Progress', 'Resolved'];
-    const safeStatus = steps.includes(status) ? status : 'Pending';
-    const currentIndex = steps.indexOf(safeStatus);
-    return steps.map((step, index) => ({
-      step,
-      completed: index <= currentIndex,
-      current: index === currentIndex
-    }));
-  };
 
   return (
     <div className="space-y-6">
@@ -181,24 +171,7 @@ export function IssueTracker() {
                     </div>
                     <Progress value={progressValue} className="h-2" />
                     
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      {getStatusSteps(currentStatus).map(({ step, completed, current }) => (
-                        <div key={step} className="flex flex-col items-center">
-                          <div 
-                            className={`w-3 h-3 rounded-full border-2 mb-1 ${
-                              completed 
-                                ? 'bg-primary border-primary' 
-                                : current 
-                                  ? 'border-primary bg-background' 
-                                  : 'border-muted-foreground bg-background'
-                            }`}
-                          />
-                          <span className={`capitalize ${current ? 'text-primary' : ''}`}>
-                            {step.replace('-', ' ')}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <StatusTimeline status={currentStatus} />
                   </div>
                   
                   <div className="flex justify-between items-center pt-2 border-t">

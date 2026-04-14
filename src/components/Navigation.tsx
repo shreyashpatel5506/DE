@@ -21,7 +21,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
   };
 
   return (
-    <nav className="bg-card border-b border-border">
+    <nav className="sticky top-0 z-40 border-b border-border/70 bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/70">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
@@ -29,7 +29,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">
                 <Shield className="w-5 h-5 text-white" />
               </div>
-              <span className="font-semibold text-lg">CivicReport</span>
+              <span className="font-semibold text-lg tracking-tight">CivicReport</span>
             </div>
             
             <div className="hidden lg:flex items-center space-x-2 ml-8">
@@ -37,7 +37,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'home' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('home')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <Home className="w-4 h-4" />
                 Home
@@ -46,7 +46,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'citizen' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('citizen')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <Users className="w-4 h-4" />
                 Report Issue
@@ -56,7 +56,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'about' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('about')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <Info className="w-4 h-4" />
                 About
@@ -65,7 +65,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'contact' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('contact')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <Phone className="w-4 h-4" />
                 Contact
@@ -74,7 +74,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'officer' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('officer')}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
               >
                 <Shield className="w-4 h-4" />
                 Officers

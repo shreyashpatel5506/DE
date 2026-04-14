@@ -9,16 +9,7 @@ import { Upload, MapPin, Camera, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../AuthContext';
 import { api } from '../../lib/api';
-const categories = [
-  'Roads & Traffic',
-  'Water & Sewerage',
-  'Electricity',
-  'Street Lighting',
-  'Waste Management',
-  'Parks & Recreation',
-  'Public Transport',
-  'Other'
-];
+import { ISSUE_CATEGORIES } from '@/lib/constants';
 
 export function IssueSubmissionForm() {
   const [formData, setFormData] = useState({
@@ -150,7 +141,7 @@ export function IssueSubmissionForm() {
                   <SelectValue placeholder="Select issue category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map(category => (
+                  {ISSUE_CATEGORIES.map(category => (
                     <SelectItem key={category} value={category}>
                       {category}
                     </SelectItem>
@@ -187,7 +178,7 @@ export function IssueSubmissionForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="photo">Photo (Optional)</Label>
+            <Label htmlFor="photo">Photo *</Label>
             <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
               <input
                 id="photo"
@@ -195,6 +186,7 @@ export function IssueSubmissionForm() {
                 accept="image/*"
                 onChange={handlePhotoUpload}
                 className="hidden"
+                required
               />
               <label
                 htmlFor="photo"

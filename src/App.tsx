@@ -40,7 +40,9 @@ function AppContent() {
       />
       
       <main className="container mx-auto px-4 py-8">
-        {renderCurrentView()}
+        <div key={currentView} className="animate-in fade-in duration-300 slide-in-from-bottom-1">
+          {renderCurrentView()}
+        </div>
       </main>
     </div>
   );

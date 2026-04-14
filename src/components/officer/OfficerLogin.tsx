@@ -7,9 +7,7 @@ import { Shield, Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../AuthContext';
 import { api } from '../../lib/api';
-const authorizedEmails = [
-  'admin@gmail.com'
-];
+import { OFFICER_ALLOWED_EMAILS } from '@/lib/constants';
 
 export function OfficerLogin() {
   const [email, setEmail] = useState('');
@@ -25,8 +23,8 @@ export function OfficerLogin() {
       return;
     }
 
-    if (!authorizedEmails.includes(email.toLowerCase())) {
-      toast.error('Unauthorized email address');
+    if (!OFFICER_ALLOWED_EMAILS.includes(email.toLowerCase() as (typeof OFFICER_ALLOWED_EMAILS)[number])) {
+      toast.error('Unauthorized government email ID');
       return;
     }
 
@@ -75,6 +73,11 @@ export function OfficerLogin() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+              <p className="mb-1 font-medium text-foreground">Allowed government IDs</p>
+              <p>{OFFICER_ALLOWED_EMAILS.join(' • ')}</p>
             </div>
 
             <div className="space-y-2">

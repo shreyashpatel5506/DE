@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { api } from '../../lib/api';
+import { MetricCard } from '../shared/MetricCard';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -166,37 +167,15 @@ export function Analytics() {
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => {
-          const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-semibold">{stat.value}</p>
-                  </div>
-                  <div className={`p-2 rounded-lg ${
-                    stat.changeType === 'positive' 
-                      ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400' 
-                      : 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400'
-                  }`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                </div>
-                <div className="flex items-center mt-2">
-                  <span className={`text-sm ${
-                    stat.changeType === 'positive' 
-                      ? 'text-green-600 dark:text-green-400' 
-                      : 'text-muted-foreground'
-                  }`}>
-                    {stat.change}
-                  </span>
-                  <span className="text-sm text-muted-foreground ml-1">
-                    {stat.description}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+            <MetricCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              hint={`${stat.change} ${stat.description}`}
+              icon={stat.icon}
+              tone={stat.changeType === 'positive' ? 'success' : 'primary'}
+            />
           );
         })}
       </div>
