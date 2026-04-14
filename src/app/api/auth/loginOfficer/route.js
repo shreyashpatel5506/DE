@@ -1,63 +1,43 @@
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
-import { connectMongo } from "@/lib/server/db";
-import Officer from "@/lib/server/models/officer.model";
 import { env } from "@/lib/server/env";
-import { findOfficerByEmail as findLocalOfficerByEmail } from "@/lib/server/storage/localStore";
 
-const STATIC_ADMIN_EMAIL = "admin@gmail.com";
-const STATIC_ADMIN_PASSWORD = "123456789";
+const ALLOWED_OFFICER_EMAILS = [
+  "commissioner@city.gov",
+  "admin@city.gov",
+  "operations@city.gov",
+  "publicworks@city.gov",
+];
 
 export async function POST(req) {
   try {
-    const { email, password } = await req.json();
+    const { email } = await req.json();
 
-    if (!email || !password) {
+    if (!email) {
       return NextResponse.json(
-        { success: false, message: "Email and password are required" },
+        { success: false, message: "Email is required" },
         { status: 400 },
       );
     }
 
-    const isStaticAdmin =
-      String(email).toLowerCase() === STATIC_ADMIN_EMAIL &&
-      String(password) === STATIC_ADMIN_PASSWORD;
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const isAllowedOfficerEmail =
+      ALLOWED_OFFICER_EMAILS.includes(normalizedEmail);
 
-    let officer;
-    let officerId;
-
-    if (isStaticAdmin) {
-      officer = {
-        _id: "admin-static",
-        email: STATIC_ADMIN_EMAIL,
-        userName: "Admin",
-        role: "officer",
-      };
-      officerId = "admin-static";
-    } else {
-      const dbReady = await connectMongo();
-      officer = dbReady
-        ? await Officer.findOne({ email })
-        : await findLocalOfficerByEmail(email);
-
-      if (!officer) {
-        return NextResponse.json(
-          { success: false, message: "No officer found with this email" },
-          { status: 404 },
-        );
-      }
-
-      const isValidPassword = await bcrypt.compare(password, officer.password);
-      if (!isValidPassword) {
-        return NextResponse.json(
-          { success: false, message: "Invalid password" },
-          { status: 401 },
-        );
-      }
-
-      officerId = officer._id;
+    if (!isAllowedOfficerEmail) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized officer email" },
+        { status: 403 },
+      );
     }
+
+    const officer = {
+      _id: `officer-${normalizedEmail}`,
+      email: normalizedEmail,
+      userName: normalizedEmail.split("@")[0],
+      role: "officer",
+    };
+    const officerId = `officer-${normalizedEmail}`;
 
     const token = jwt.sign({ id: officerId, role: "officer" }, env.JWT_SECRET, {
       expiresIn: "7d",
@@ -66,9 +46,7 @@ export async function POST(req) {
     const response = NextResponse.json(
       {
         success: true,
-        message: isStaticAdmin
-          ? "Admin login successful"
-          : "Officer login successful",
+        message: "Officer login successful",
         token,
         officer: {
           id: officerId,
