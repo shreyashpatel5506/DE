@@ -16,6 +16,7 @@ export function CustomCursor() {
     const ring = ringRef.current;
     const glow = glowRef.current;
     if (!dot || !ring || !glow) return;
+    const sparks = Array.from(document.querySelectorAll<HTMLSpanElement>('.cursor-spark'));
 
     document.body.classList.add('custom-cursor-enabled');
 
@@ -29,7 +30,37 @@ export function CustomCursor() {
     let targetScale = 1;
     let velocityX = 0;
     let velocityY = 0;
+    let previousX = targetX;
+    let previousY = targetY;
+    let sparkIndex = 0;
+    let lastSparkAt = 0;
     let rafId = 0;
+
+    const emitSpark = (x: number, y: number, intensity: number) => {
+      const now = performance.now();
+      if (now - lastSparkAt < 28) return;
+      lastSparkAt = now;
+
+      const spark = sparks[sparkIndex % sparks.length];
+      sparkIndex += 1;
+      if (!spark) return;
+
+      const angle = Math.random() * Math.PI * 2;
+      const travel = (18 + Math.random() * 34) * Math.max(0.85, intensity);
+      const dx = Math.cos(angle) * travel;
+      const dy = Math.sin(angle) * travel;
+      const duration = 320 + Math.random() * 180;
+
+      spark.style.setProperty('--spark-x', `${x}px`);
+      spark.style.setProperty('--spark-y', `${y}px`);
+      spark.style.setProperty('--spark-dx', `${dx.toFixed(2)}px`);
+      spark.style.setProperty('--spark-dy', `${dy.toFixed(2)}px`);
+      spark.style.setProperty('--spark-r', `${angle.toFixed(4)}rad`);
+      spark.style.setProperty('--spark-duration', `${duration.toFixed(0)}ms`);
+      spark.classList.remove('spark-active');
+      void spark.offsetWidth;
+      spark.classList.add('spark-active');
+    };
 
     const render = () => {
       ringX += (targetX - ringX) * 0.18;
@@ -59,6 +90,16 @@ export function CustomCursor() {
     const onMouseMove = (event: MouseEvent) => {
       targetX = event.clientX;
       targetY = event.clientY;
+
+      const deltaX = targetX - previousX;
+      const deltaY = targetY - previousY;
+      const speed = Math.hypot(deltaX, deltaY);
+      if (speed > 2) {
+        emitSpark(targetX, targetY, Math.min(speed / 18, 1.45));
+      }
+
+      previousX = targetX;
+      previousY = targetY;
     };
 
     const onMouseOver = (event: MouseEvent) => {
@@ -118,6 +159,9 @@ export function CustomCursor() {
 
   return (
     <>
+      {Array.from({ length: 18 }).map((_, index) => (
+        <span key={index} aria-hidden="true" className="cursor-spark" />
+      ))}
       <div ref={glowRef} aria-hidden="true" className="custom-cursor custom-cursor-glow" />
       <div ref={ringRef} aria-hidden="true" className="custom-cursor custom-cursor-ring" />
       <div ref={dotRef} aria-hidden="true" className="custom-cursor custom-cursor-dot" />
