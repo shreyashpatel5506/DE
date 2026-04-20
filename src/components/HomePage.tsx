@@ -10,6 +10,7 @@ import { Heart, MessageCircle, Share2, Search, TrendingUp, Clock, Users, CheckCi
 import { toast } from 'sonner';
 import { api } from '../lib/api';
 import { useAuth } from './AuthContext';
+import { Magnetic } from './effects/Magnetic';
 
 type LivePost = {
   id: string;
@@ -285,68 +286,114 @@ export function HomePage() {
     toast.success('Link copied to clipboard!');
   };
 
+  const cinematicWords = ['CivicReport', 'Community'];
+
+  const handleExploreFeed = () => {
+    const feed = document.getElementById('live-feed');
+    if (feed) {
+      feed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleReportIssue = () => {
+    toast.info('Open the Report section from navigation to submit a new issue.');
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Hero Section */}
-      <div className="text-center py-8">
-        <h1 className="mb-4 bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-          CivicReport Community
+      <section className="motion-section text-center py-8">
+        <div className="motion-item cinematic-intro inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-cyan-200/90 mb-5">
+          Live Civic Pulse • Premium Motion UI
+        </div>
+
+        <h1 className="motion-item cinematic-title mb-4">
+          {cinematicWords.map((word, index) => (
+            <span
+              key={word}
+              className="cinematic-word"
+              style={{ ['--word-delay' as string]: `${index * 140}ms` }}
+            >
+              {word}
+            </span>
+          ))}
         </h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+
+        <p className="motion-item text-muted-foreground max-w-2xl mx-auto mb-6 cinematic-subtitle">
           Stay updated with the latest infrastructure improvements, community announcements, 
           and civic developments in your area. Together, we're building a better community.
         </p>
+
+        <div className="motion-item flex flex-wrap items-center justify-center gap-3 mb-6">
+          <Magnetic strength={16}>
+            <Button
+              onClick={handleExploreFeed}
+              className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 text-slate-950 hover:brightness-110 shadow-[0_0_24px_-6px_rgba(56,189,248,0.9)]"
+            >
+              Explore Live Feed
+            </Button>
+          </Magnetic>
+          <Magnetic strength={14}>
+            <Button
+              variant="outline"
+              onClick={handleReportIssue}
+              className="border-cyan-300/35 bg-slate-900/50 text-cyan-100 hover:bg-cyan-500/10"
+            >
+              Report New Issue
+            </Button>
+          </Magnetic>
+        </div>
         
         {/* Search */}
-        <div className="max-w-md mx-auto">
+        <div className="motion-item max-w-md mx-auto">
           <div className="relative">
             <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search posts..."
-              className="pl-10"
+              className="pl-10 border-cyan-300/20 bg-slate-900/55"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
+      <section className="motion-section grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <Card className="motion-item border-cyan-300/15 bg-slate-950/45 backdrop-blur-md">
           <CardContent className="p-4 text-center">
             <TrendingUp className="w-8 h-8 text-blue-500 mx-auto mb-2" />
             <div className="font-semibold">{stats.resolved}</div>
             <div className="text-sm text-muted-foreground">Issues Resolved</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="motion-item border-cyan-300/15 bg-slate-950/45 backdrop-blur-md">
           <CardContent className="p-4 text-center">
             <Clock className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
             <div className="font-semibold">{stats.inProgress}</div>
             <div className="text-sm text-muted-foreground">In Progress</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="motion-item border-cyan-300/15 bg-slate-950/45 backdrop-blur-md">
           <CardContent className="p-4 text-center">
             <Users className="w-8 h-8 text-green-500 mx-auto mb-2" />
             <div className="font-semibold">{stats.total}</div>
             <div className="text-sm text-muted-foreground">Total Live Posts</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="motion-item border-cyan-300/15 bg-slate-950/45 backdrop-blur-md">
           <CardContent className="p-4 text-center">
             <CheckCircle className="w-8 h-8 text-purple-500 mx-auto mb-2" />
             <div className="font-semibold">{stats.pending}</div>
             <div className="text-sm text-muted-foreground">Pending</div>
           </CardContent>
         </Card>
-      </div>
+      </section>
 
       {/* Posts Feed */}
-      <div className="space-y-6">
+      <section id="live-feed" className="motion-section space-y-6">
         {filteredPosts.length === 0 ? (
-          <Card>
+          <Card className="motion-item border-cyan-300/15 bg-slate-950/45 backdrop-blur-md">
             <CardContent className="text-center py-8">
               <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="mb-2">No Posts Found</h3>
@@ -359,7 +406,7 @@ export function HomePage() {
           filteredPosts.map(post => {
             const TypeIcon = typeConfig.issue.icon;
             return (
-              <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <Card key={post.id} className="motion-item overflow-hidden border-cyan-300/15 bg-slate-950/45 backdrop-blur-md hover:shadow-[0_0_40px_-18px_rgba(56,189,248,0.6)] transition-shadow duration-300">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
@@ -488,18 +535,25 @@ export function HomePage() {
             );
           })
         )}
-      </div>
+      </section>
 
       {/* Call to Action */}
-      <Card className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950 border-0">
+      <Card className="motion-section bg-gradient-to-r from-cyan-950/70 via-blue-950/60 to-purple-950/65 border-cyan-300/20 backdrop-blur-md">
         <CardContent className="text-center py-8">
-          <h3 className="mb-2">Have an Infrastructure Issue?</h3>
-          <p className="text-muted-foreground mb-4">
+          <h3 className="motion-item mb-2">Have an Infrastructure Issue?</h3>
+          <p className="motion-item text-muted-foreground mb-4">
             Report issues in your area and help us maintain our community infrastructure.
           </p>
-          <Button className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600">
-            Report an Issue
-          </Button>
+          <div className="motion-item flex justify-center">
+            <Magnetic strength={18}>
+              <Button
+                onClick={handleReportIssue}
+                className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 text-slate-950 hover:brightness-110 shadow-[0_0_28px_-8px_rgba(56,189,248,0.9)]"
+              >
+                Report an Issue
+              </Button>
+            </Magnetic>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -1,8 +1,7 @@
 import React from 'react';
-import { Moon, Sun, Shield, Users, Home, Info, Phone, Bell } from 'lucide-react';
+import { Shield, Users, Home, Info, Phone, Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { useTheme } from './ThemeProvider';
 import { useAuth } from './AuthContext';
 import { useNotifications } from './NotificationContext';
 
@@ -12,7 +11,6 @@ interface NavigationProps {
 }
 
 export function Navigation({ currentView, setCurrentView }: NavigationProps) {
-  const { theme, toggleTheme } = useTheme();
   const { isLoggedIn, role, logout } = useAuth();
   const { unreadCount, markAllRead } = useNotifications();
 
@@ -21,7 +19,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
   };
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border/70 bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/70">
+    <nav className="sticky top-0 z-40 border-b border-cyan-300/15 bg-black/35 shadow-[0_8px_32px_-12px_rgba(34,211,238,0.45)] backdrop-blur-xl supports-[backdrop-filter]:bg-black/25">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
@@ -37,7 +35,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'home' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('home')}
-                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
+                className="cursor-hit flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-cyan-400/10"
               >
                 <Home className="w-4 h-4" />
                 Home
@@ -46,7 +44,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'citizen' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('citizen')}
-                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
+                className="cursor-hit flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-cyan-400/10"
               >
                 <Users className="w-4 h-4" />
                 Report Issue
@@ -56,7 +54,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'about' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('about')}
-                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
+                className="cursor-hit flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-cyan-400/10"
               >
                 <Info className="w-4 h-4" />
                 About
@@ -65,7 +63,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'contact' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('contact')}
-                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
+                className="cursor-hit flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-cyan-400/10"
               >
                 <Phone className="w-4 h-4" />
                 Contact
@@ -74,7 +72,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant={currentView === 'officer' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => handleViewChange('officer')}
-                className="flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5"
+                className="cursor-hit flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 hover:bg-cyan-400/10"
               >
                 <Shield className="w-4 h-4" />
                 Officers
@@ -88,7 +86,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant="ghost"
                 size="sm"
                 onClick={markAllRead}
-                className="relative p-2"
+                className="cursor-hit relative p-2"
                 title="Mark all notifications as read"
               >
                 <Bell className="w-4 h-4" />
@@ -105,23 +103,11 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 variant="outline"
                 size="sm"
                 onClick={logout}
-                className="mr-2"
+                className="cursor-hit mr-2 border-cyan-300/30 bg-cyan-500/5 hover:bg-cyan-500/10"
               >
                 Logout ({role})
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleTheme}
-              className="p-2"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-4 h-4" />
-              ) : (
-                <Sun className="w-4 h-4" />
-              )}
-            </Button>
           </div>
         </div>
         
@@ -132,7 +118,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'home' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('home')}
-              className="flex shrink-0 items-center gap-2 snap-start"
+              className="cursor-hit flex shrink-0 items-center gap-2 snap-start"
             >
               <Home className="w-4 h-4" />
               Home
@@ -141,7 +127,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'citizen' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('citizen')}
-              className="flex shrink-0 items-center gap-2 snap-start"
+              className="cursor-hit flex shrink-0 items-center gap-2 snap-start"
             >
               <Users className="w-4 h-4" />
               Report
@@ -150,7 +136,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'officer' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('officer')}
-              className="flex shrink-0 items-center gap-2 snap-start"
+              className="cursor-hit flex shrink-0 items-center gap-2 snap-start"
             >
               <Shield className="w-4 h-4" />
               Dashboard
@@ -159,7 +145,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'about' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('about')}
-              className="flex shrink-0 items-center gap-2 snap-start"
+              className="cursor-hit flex shrink-0 items-center gap-2 snap-start"
             >
               <Info className="w-4 h-4" />
               About
@@ -168,7 +154,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'contact' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('contact')}
-              className="flex shrink-0 items-center gap-2 snap-start"
+              className="cursor-hit flex shrink-0 items-center gap-2 snap-start"
             >
               <Phone className="w-4 h-4" />
               Contact

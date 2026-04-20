@@ -10,6 +10,9 @@ import { ContactPage } from './components/ContactPage';
 import { ThemeProvider } from './components/ThemeProvider';
 import { AuthProvider } from './components/AuthContext';
 import { NotificationProvider } from './components/NotificationContext';
+import { AnimatedBackdrop } from './components/effects/AnimatedBackdrop';
+import { CustomCursor } from './components/effects/CustomCursor';
+import { ScrollEffects } from './components/effects/ScrollEffects';
 import { Toaster } from 'sonner';
 
 function AppContent() {
@@ -33,13 +36,17 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="app-shell relative min-h-screen bg-background text-foreground transition-colors duration-300">
+      <AnimatedBackdrop />
+      <CustomCursor />
+      <ScrollEffects />
+
       <Navigation 
         currentView={currentView} 
         setCurrentView={setCurrentView}
       />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="relative z-10 container mx-auto px-4 py-8">
         <div key={currentView} className="animate-in fade-in duration-300 slide-in-from-bottom-1">
           {renderCurrentView()}
         </div>
