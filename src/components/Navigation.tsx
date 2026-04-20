@@ -127,12 +127,12 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
         
         {/* Mobile navigation */}
         <div className="lg:hidden pb-4">
-          <div className="grid grid-cols-2 gap-2 mb-2">
+          <div className="flex gap-2 overflow-x-auto whitespace-nowrap snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <Button
               variant={currentView === 'home' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('home')}
-              className="flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 snap-start"
             >
               <Home className="w-4 h-4" />
               Home
@@ -141,18 +141,16 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'citizen' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('citizen')}
-              className="flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 snap-start"
             >
               <Users className="w-4 h-4" />
               Report
             </Button>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
             <Button
               variant={currentView === 'officer' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('officer')}
-              className="flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 snap-start"
             >
               <Shield className="w-4 h-4" />
               Dashboard
@@ -161,7 +159,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'about' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('about')}
-              className="flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 snap-start"
             >
               <Info className="w-4 h-4" />
               About
@@ -170,7 +168,7 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               variant={currentView === 'contact' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewChange('contact')}
-              className="flex items-center gap-2"
+              className="flex shrink-0 items-center gap-2 snap-start"
             >
               <Phone className="w-4 h-4" />
               Contact
