@@ -24,15 +24,17 @@ export function ScrollEffects() {
       if (items.length > 0) {
         items.forEach((element, itemIndex) => {
           element.classList.add('scroll-reveal');
-          const delay = Math.min(sectionIndex * 120 + itemIndex * 75, 720);
+          const delay = Math.min(sectionIndex * 95 + itemIndex * 85, 760);
           element.style.setProperty('--reveal-delay', `${delay}ms`);
+          element.style.setProperty('--reveal-distance', `${Math.max(20 - itemIndex * 2, 10)}px`);
           assigned.add(element);
         });
         return;
       }
 
       section.classList.add('scroll-reveal');
-      section.style.setProperty('--reveal-delay', `${Math.min(sectionIndex * 120, 520)}ms`);
+      section.style.setProperty('--reveal-delay', `${Math.min(sectionIndex * 95, 560)}ms`);
+      section.style.setProperty('--reveal-distance', '22px');
       assigned.add(section);
     });
 
@@ -46,7 +48,8 @@ export function ScrollEffects() {
 
     fallbackCandidates.forEach((element, index) => {
       element.classList.add('scroll-reveal');
-      element.style.setProperty('--reveal-delay', `${Math.min(index * 35, 260)}ms`);
+      element.style.setProperty('--reveal-delay', `${Math.min(index * 45, 300)}ms`);
+      element.style.setProperty('--reveal-distance', '18px');
       assigned.add(element);
     });
 
@@ -66,6 +69,19 @@ export function ScrollEffects() {
 
     candidates.forEach((element) => observer.observe(element));
 
+    const parallaxLayers = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-parallax-speed]')
+    );
+
+    const updateParallax = () => {
+      const scrollY = window.scrollY;
+      parallaxLayers.forEach((layer) => {
+        const speed = Number(layer.dataset.parallaxSpeed || '0');
+        const movement = scrollY * speed;
+        layer.style.transform = `translate3d(0, ${movement.toFixed(2)}px, 0)`;
+      });
+    };
+
     const progressBar = document.getElementById('scroll-progress-bar');
     const updateProgress = () => {
       if (!progressBar) return;
@@ -75,12 +91,15 @@ export function ScrollEffects() {
     };
 
     updateProgress();
+    updateParallax();
     window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('scroll', updateParallax, { passive: true });
     window.addEventListener('resize', updateProgress);
 
     return () => {
       observer.disconnect();
       window.removeEventListener('scroll', updateProgress);
+      window.removeEventListener('scroll', updateParallax);
       window.removeEventListener('resize', updateProgress);
     };
   }, []);

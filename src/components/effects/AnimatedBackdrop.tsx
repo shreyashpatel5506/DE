@@ -24,10 +24,10 @@ export function AnimatedBackdrop() {
 
   return (
     <div ref={backdropRef} aria-hidden="true" className="animated-backdrop">
-      <div className="backdrop-grid" />
-      <div className="backdrop-orb orb-1" />
-      <div className="backdrop-orb orb-2" />
-      <div className="backdrop-orb orb-3" />
+      <div className="backdrop-grid" data-parallax-speed="-0.015" />
+      <div className="backdrop-orb orb-1" data-parallax-speed="-0.045" />
+      <div className="backdrop-orb orb-2" data-parallax-speed="0.03" />
+      <div className="backdrop-orb orb-3" data-parallax-speed="-0.02" />
       <div className="backdrop-noise" />
     </div>
   );
