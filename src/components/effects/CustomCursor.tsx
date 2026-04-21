@@ -16,9 +16,9 @@ export function CustomCursor() {
     let sparkIndex = 0;
     let lastSparkAt = 0;
 
-    const emitSpark = (x: number, y: number, intensity: number) => {
+    const emitSpark = (x: number, y: number, intensity: number, force = false) => {
       const now = performance.now();
-      if (now - lastSparkAt < 28) return;
+      if (!force && now - lastSparkAt < 16) return;
       lastSparkAt = now;
 
       const spark = sparks[sparkIndex % sparks.length];
@@ -42,9 +42,9 @@ export function CustomCursor() {
       spark.classList.add('spark-active');
     };
 
-    const emitSparkBurst = (x: number, y: number, count: number, intensity: number) => {
+    const emitSparkBurst = (x: number, y: number, count: number, intensity: number, force = false) => {
       for (let i = 0; i < count; i += 1) {
-        emitSpark(x, y, intensity * (0.9 + Math.random() * 0.35));
+        emitSpark(x, y, intensity * (0.9 + Math.random() * 0.35), force);
       }
     };
 
@@ -52,21 +52,29 @@ export function CustomCursor() {
       const onTouchStart = (event: TouchEvent) => {
         const touch = event.changedTouches[0] || event.touches[0];
         if (!touch) return;
-        emitSparkBurst(touch.clientX, touch.clientY, 3, 1.15);
+        emitSparkBurst(touch.clientX, touch.clientY, 7, 1.25, true);
       };
 
       const onTouchMove = (event: TouchEvent) => {
         const touch = event.touches[0] || event.changedTouches[0];
         if (!touch) return;
-        emitSpark(touch.clientX, touch.clientY, 1.02);
+        emitSparkBurst(touch.clientX, touch.clientY, 2, 1.08);
+      };
+
+      const onTouchEnd = (event: TouchEvent) => {
+        const touch = event.changedTouches[0] || event.touches[0];
+        if (!touch) return;
+        emitSparkBurst(touch.clientX, touch.clientY, 5, 1.18, true);
       };
 
       window.addEventListener('touchstart', onTouchStart, { passive: true });
       window.addEventListener('touchmove', onTouchMove, { passive: true });
+      window.addEventListener('touchend', onTouchEnd, { passive: true });
 
       return () => {
         window.removeEventListener('touchstart', onTouchStart);
         window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend', onTouchEnd);
       };
     }
 
@@ -124,7 +132,9 @@ export function CustomCursor() {
       const deltaY = targetY - previousY;
       const speed = Math.hypot(deltaX, deltaY);
       if (speed > 2) {
-        emitSpark(targetX, targetY, Math.min(speed / 18, 1.45));
+        const intensity = Math.min(speed / 14, 1.7);
+        const count = speed > 14 ? 3 : speed > 8 ? 2 : 1;
+        emitSparkBurst(targetX, targetY, count, intensity);
       }
 
       previousX = targetX;
@@ -188,7 +198,7 @@ export function CustomCursor() {
 
   return (
     <>
-      {Array.from({ length: 18 }).map((_, index) => (
+      {Array.from({ length: 30 }).map((_, index) => (
         <span key={index} aria-hidden="true" className="cursor-spark" />
       ))}
       <div ref={glowRef} aria-hidden="true" className="custom-cursor custom-cursor-glow" />
