@@ -8,33 +8,13 @@ export function CustomCursor() {
   const glowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) {
-      return;
-    }
-
-    const dot = dotRef.current;
-    const ring = ringRef.current;
-    const glow = glowRef.current;
-    if (!dot || !ring || !glow) return;
     const sparks = Array.from(document.querySelectorAll<HTMLSpanElement>('.cursor-spark'));
+    if (sparks.length === 0) return;
 
-    document.body.classList.add('custom-cursor-enabled');
+    const isFinePointer = window.matchMedia('(pointer: fine)').matches;
 
-    let ringX = window.innerWidth / 2;
-    let ringY = window.innerHeight / 2;
-    let glowX = ringX;
-    let glowY = ringY;
-    let targetX = ringX;
-    let targetY = ringY;
-    let scale = 1;
-    let targetScale = 1;
-    let velocityX = 0;
-    let velocityY = 0;
-    let previousX = targetX;
-    let previousY = targetY;
     let sparkIndex = 0;
     let lastSparkAt = 0;
-    let rafId = 0;
 
     const emitSpark = (x: number, y: number, intensity: number) => {
       const now = performance.now();
@@ -61,6 +41,55 @@ export function CustomCursor() {
       void spark.offsetWidth;
       spark.classList.add('spark-active');
     };
+
+    const emitSparkBurst = (x: number, y: number, count: number, intensity: number) => {
+      for (let i = 0; i < count; i += 1) {
+        emitSpark(x, y, intensity * (0.9 + Math.random() * 0.35));
+      }
+    };
+
+    if (!isFinePointer) {
+      const onTouchStart = (event: TouchEvent) => {
+        const touch = event.changedTouches[0] || event.touches[0];
+        if (!touch) return;
+        emitSparkBurst(touch.clientX, touch.clientY, 3, 1.15);
+      };
+
+      const onTouchMove = (event: TouchEvent) => {
+        const touch = event.touches[0] || event.changedTouches[0];
+        if (!touch) return;
+        emitSpark(touch.clientX, touch.clientY, 1.02);
+      };
+
+      window.addEventListener('touchstart', onTouchStart, { passive: true });
+      window.addEventListener('touchmove', onTouchMove, { passive: true });
+
+      return () => {
+        window.removeEventListener('touchstart', onTouchStart);
+        window.removeEventListener('touchmove', onTouchMove);
+      };
+    }
+
+    const dot = dotRef.current;
+    const ring = ringRef.current;
+    const glow = glowRef.current;
+    if (!dot || !ring || !glow) return;
+
+    document.body.classList.add('custom-cursor-enabled');
+
+    let ringX = window.innerWidth / 2;
+    let ringY = window.innerHeight / 2;
+    let glowX = ringX;
+    let glowY = ringY;
+    let targetX = ringX;
+    let targetY = ringY;
+    let scale = 1;
+    let targetScale = 1;
+    let velocityX = 0;
+    let velocityY = 0;
+    let previousX = targetX;
+    let previousY = targetY;
+    let rafId = 0;
 
     const render = () => {
       ringX += (targetX - ringX) * 0.18;
