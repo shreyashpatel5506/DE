@@ -85,7 +85,27 @@ export async function POST(req) {
         }),
       });
     } catch (emailError) {
-      console.warn("Password reset email failed:", emailError?.message);
+      if (dbReady) {
+        await User.updateOne(
+          { _id: user._id },
+          {
+            $unset: {
+              passwordResetToken: "",
+              passwordResetExpiresAt: "",
+            },
+          },
+        );
+      } else {
+        await setLocalUserResetToken(normalizedEmail, null, null);
+      }
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: emailError?.message || "Failed to send reset email",
+        },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json(

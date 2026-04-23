@@ -49,6 +49,12 @@ export async function POST(req) {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+    await sendBrevoEmail({
+      to: normalizedEmail,
+      subject: "🔐 Verify your email - OTP for CivicReport",
+      htmlContent: getOtpEmailTemplate({ otp, minutes: 10 }),
+    });
+
     if (dbReady) {
       await Otp.deleteMany({ email: normalizedEmail, purpose });
       await Otp.create({
@@ -66,24 +72,14 @@ export async function POST(req) {
       });
     }
 
-    try {
-      await sendBrevoEmail({
-        to: normalizedEmail,
-        subject: "🔐 Verify your email - OTP for CivicReport",
-        htmlContent: getOtpEmailTemplate({ otp, minutes: 10 }),
-      });
-    } catch (error) {
-      console.warn("Brevo send failed:", error.message);
-    }
-
     return NextResponse.json(
       { success: true, message: "OTP sent successfully" },
       { status: 200 },
     );
   } catch (error) {
-    console.error(error);
+    console.error("Brevo API OTP error:", error?.message || error);
     return NextResponse.json(
-      { success: false, message: "Failed to send OTP" },
+      { success: false, message: error?.message || "Failed to send OTP" },
       { status: 500 },
     );
   }
