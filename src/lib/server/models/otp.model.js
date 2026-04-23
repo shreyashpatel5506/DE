@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const otpSchema = new mongoose.Schema({
   email: { type: String, required: true, index: true },
   otp: { type: String, required: true },
+  purpose: { type: String, default: "signup", index: true },
   expiresAt: { type: Date, required: true },
 });
 

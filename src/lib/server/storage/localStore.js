@@ -52,6 +52,8 @@ export async function createUser(data) {
     userName: data.userName,
     password: data.password,
     emailVerified: Boolean(data.emailVerified),
+    passwordResetToken: null,
+    passwordResetExpiresAt: null,
     createdAt: now(),
     updatedAt: now(),
   };
@@ -83,31 +85,102 @@ export async function createOfficer(data) {
 
 export async function saveOtp(data) {
   const state = await readState();
-  state.otps = state.otps.filter((otp) => otp.email !== data.email);
+  const purpose = data.purpose || "signup";
+  state.otps = state.otps.filter(
+    (otp) => !(otp.email === data.email && otp.purpose === purpose),
+  );
   state.otps.push({
     _id: randomUUID(),
     email: data.email,
     otp: data.otp,
+    purpose,
     expiresAt: data.expiresAt,
     createdAt: now(),
   });
   await writeState(state);
 }
 
-export async function findOtp(email, otp) {
+export async function findOtp(email, otp, purpose = "signup") {
   const state = await readState();
   const record =
-    state.otps.find((entry) => entry.email === email && entry.otp === otp) ||
-    null;
+    state.otps.find(
+      (entry) =>
+        entry.email === email &&
+        entry.otp === otp &&
+        (entry.purpose || "signup") === purpose,
+    ) || null;
+
+  if (!record) return null;
+
+  if (new Date(record.expiresAt) < new Date()) {
+    state.otps = state.otps.filter((entry) => entry._id !== record._id);
+    await writeState(state);
+    return null;
+  }
+
   return record ? clone(record) : null;
 }
 
-export async function deleteOtp(email, otp) {
+export async function deleteOtp(email, otp, purpose = "signup") {
   const state = await readState();
   state.otps = state.otps.filter(
-    (entry) => !(entry.email === email && entry.otp === otp),
+    (entry) =>
+      !(
+        entry.email === email &&
+        entry.otp === otp &&
+        (entry.purpose || "signup") === purpose
+      ),
   );
   await writeState(state);
+}
+
+export async function setUserResetToken(email, token, expiresAt) {
+  const state = await readState();
+  const userIndex = state.users.findIndex((user) => user.email === email);
+  if (userIndex === -1) return false;
+
+  state.users[userIndex] = {
+    ...state.users[userIndex],
+    passwordResetToken: token,
+    passwordResetExpiresAt: expiresAt,
+    updatedAt: now(),
+  };
+
+  await writeState(state);
+  return true;
+}
+
+export async function findUserByResetToken(token) {
+  const state = await readState();
+  const user =
+    state.users.find((entry) => entry.passwordResetToken === token) || null;
+  if (!user) return null;
+
+  if (
+    !user.passwordResetExpiresAt ||
+    new Date(user.passwordResetExpiresAt) < new Date()
+  ) {
+    return null;
+  }
+
+  return clone(user);
+}
+
+export async function resetUserPasswordById(id, hashedPassword) {
+  const state = await readState();
+  const userIndex = state.users.findIndex((user) => user._id === id);
+  if (userIndex === -1) return null;
+
+  state.users[userIndex] = {
+    ...state.users[userIndex],
+    password: hashedPassword,
+    passwordResetToken: null,
+    passwordResetExpiresAt: null,
+    updatedAt: now(),
+  };
+
+  await writeState(state);
+  return clone(state.users[userIndex]);
 }
 
 export async function createPost(data) {

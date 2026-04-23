@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { connectMongo } from "@/lib/server/db";
 import Otp from "@/lib/server/models/otp.model";
-import { saveOtp as saveLocalOtp } from "@/lib/server/storage/localStore";
+import User from "@/lib/server/models/user.model";
+import {
+  findUserByEmail as findLocalUserByEmail,
+  saveOtp as saveLocalOtp,
+} from "@/lib/server/storage/localStore";
 import { sendBrevoEmail } from "@/lib/server/brevo";
+import { getOtpEmailTemplate } from "@/lib/server/emailTemplates";
 
 export async function POST(req) {
   try {
     const dbReady = await connectMongo();
-    const { email } = await req.json();
+    const { email, purpose = "signup" } = await req.json();
 
     if (!email) {
       return NextResponse.json(
@@ -24,28 +29,48 @@ export async function POST(req) {
       );
     }
 
+    if (purpose !== "signup") {
+      return NextResponse.json(
+        { success: false, message: "Unsupported OTP purpose" },
+        { status: 422 },
+      );
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = dbReady
+      ? await User.findOne({ email: normalizedEmail })
+      : await findLocalUserByEmail(normalizedEmail);
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, message: "User already exists with this email" },
+        { status: 409 },
+      );
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     if (dbReady) {
-      await Otp.deleteMany({ email });
+      await Otp.deleteMany({ email: normalizedEmail, purpose });
       await Otp.create({
-        email,
+        email: normalizedEmail,
         otp,
+        purpose,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
       });
     } else {
       await saveLocalOtp({
-        email,
+        email: normalizedEmail,
         otp,
+        purpose,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
       });
     }
 
     try {
       await sendBrevoEmail({
-        to: email,
-        subject: "🔐 Your OTP Code",
-        htmlContent: `<h2>Your OTP is ${otp}</h2><p>Valid for 10 minutes</p>`,
+        to: normalizedEmail,
+        subject: "🔐 Verify your email - OTP for CivicReport",
+        htmlContent: getOtpEmailTemplate({ otp, minutes: 10 }),
       });
     } catch (error) {
       console.warn("Brevo send failed:", error.message);

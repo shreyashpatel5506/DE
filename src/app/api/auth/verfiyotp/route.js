@@ -9,7 +9,7 @@ import {
 export async function POST(req) {
   try {
     const dbReady = await connectMongo();
-    const { email, otp } = await req.json();
+    const { email, otp, purpose = "signup" } = await req.json();
 
     if (!email || !otp) {
       return NextResponse.json(
@@ -18,9 +18,11 @@ export async function POST(req) {
       );
     }
 
+    const normalizedEmail = String(email).toLowerCase().trim();
+
     const record = dbReady
-      ? await Otp.findOne({ email, otp })
-      : await findLocalOtp(email, otp);
+      ? await Otp.findOne({ email: normalizedEmail, otp, purpose })
+      : await findLocalOtp(normalizedEmail, otp, purpose);
     if (!record) {
       return NextResponse.json(
         { success: false, message: "Invalid or expired OTP" },
@@ -28,10 +30,22 @@ export async function POST(req) {
       );
     }
 
+    if (new Date(record.expiresAt) < new Date()) {
+      if (dbReady) {
+        await Otp.deleteOne({ _id: record._id });
+      } else {
+        await deleteLocalOtp(normalizedEmail, otp, purpose);
+      }
+      return NextResponse.json(
+        { success: false, message: "OTP expired" },
+        { status: 400 },
+      );
+    }
+
     if (dbReady) {
       await Otp.deleteOne({ _id: record._id });
     } else {
-      await deleteLocalOtp(email, otp);
+      await deleteLocalOtp(normalizedEmail, otp, purpose);
     }
 
     return NextResponse.json(

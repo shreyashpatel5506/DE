@@ -1,5 +1,9 @@
 export const env = {
   NODE_ENV: process.env.NODE_ENV || process.env.env || "development",
+  APP_BASE_URL:
+    process.env.APP_BASE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "http://localhost:3000",
   MONGODB_URI:
     process.env.MONGODB_URI ||
     "mongodb://localhost:27017/ImproveInfrastructure",

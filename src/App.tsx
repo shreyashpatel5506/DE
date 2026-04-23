@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { HomePage } from './components/HomePage';
 import { CitizenView } from './components/CitizenView';
@@ -17,6 +17,15 @@ import { Toaster } from 'sonner';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<'home' | 'citizen' | 'officer' | 'about' | 'contact'>('home');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedView = params.get('view');
+    if (requestedView === 'home' || requestedView === 'citizen' || requestedView === 'officer' || requestedView === 'about' || requestedView === 'contact') {
+      setCurrentView(requestedView);
+    }
+  }, []);
 
   const renderCurrentView = () => {
     switch (currentView) {

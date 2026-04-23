@@ -3,27 +3,35 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import { connectMongo } from "@/lib/server/db";
 import User from "@/lib/server/models/user.model";
+import Otp from "@/lib/server/models/otp.model";
 import { env } from "@/lib/server/env";
 import {
   createUser as createLocalUser,
+  deleteOtp as deleteLocalOtp,
+  findOtp as findLocalOtp,
   findUserByEmail as findLocalUserByEmail,
 } from "@/lib/server/storage/localStore";
 
 export async function POST(req) {
   try {
     const dbReady = await connectMongo();
-    const { email, password, userName } = await req.json();
+    const { email, password, userName, otp } = await req.json();
 
-    if (!email || !password || !userName) {
+    if (!email || !password || !userName || !otp) {
       return NextResponse.json(
-        { success: false, message: "All fields are required" },
+        {
+          success: false,
+          message: "Email, name, password and OTP are required",
+        },
         { status: 400 },
       );
     }
 
+    const normalizedEmail = String(email).toLowerCase().trim();
+
     const exists = dbReady
-      ? await User.findOne({ email })
-      : await findLocalUserByEmail(email);
+      ? await User.findOne({ email: normalizedEmail })
+      : await findLocalUserByEmail(normalizedEmail);
     if (exists) {
       return NextResponse.json(
         { success: false, message: "User already exists" },
@@ -31,21 +39,38 @@ export async function POST(req) {
       );
     }
 
+    const otpRecord = dbReady
+      ? await Otp.findOne({ email: normalizedEmail, otp, purpose: "signup" })
+      : await findLocalOtp(normalizedEmail, otp, "signup");
+
+    if (!otpRecord || new Date(otpRecord.expiresAt) < new Date()) {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired OTP" },
+        { status: 400 },
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = dbReady
       ? await User.create({
-          email,
+          email: normalizedEmail,
           userName,
           password: hashedPassword,
           emailVerified: true,
         })
       : await createLocalUser({
-          email,
+          email: normalizedEmail,
           userName,
           password: hashedPassword,
           emailVerified: true,
         });
+
+    if (dbReady) {
+      await Otp.deleteOne({ _id: otpRecord._id });
+    } else {
+      await deleteLocalOtp(normalizedEmail, otp, "signup");
+    }
 
     const token = jwt.sign({ id: user._id, role: "user" }, env.JWT_SECRET, {
       expiresIn: "7d",
