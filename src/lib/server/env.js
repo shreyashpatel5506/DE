@@ -20,4 +20,5 @@ export const env = {
   BREVO_API_KEY: cleanEnv(process.env.BREVO_API_KEY),
   BREVO_SENDER: cleanEnv(process.env.BREVO_SENDER),
   BREVO_SMTP_USER: cleanEnv(process.env.BREVO_SMTP_USER),
+  CONTACT_RECEIVER_EMAIL: cleanEnv(process.env.CONTACT_RECEIVER_EMAIL),
 };

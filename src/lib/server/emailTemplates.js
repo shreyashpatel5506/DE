@@ -52,3 +52,45 @@ export function getPasswordResetEmailTemplate({ resetUrl, minutes = 30 }) {
     footer: `${appName} account security team`,
   });
 }
+
+export function getContactAdminEmailTemplate({
+  name,
+  email,
+  phone,
+  inquiryType,
+  subject,
+  message,
+}) {
+  return baseTemplate({
+    title: "New Contact Form Submission",
+    subtitle: `${appName} website contact inbox`,
+    bodyHtml: `
+      <p style="margin:0 0 12px 0;font-size:14px;color:#cbd5e1;">A user has submitted the contact form. Details are below:</p>
+      <div style="padding:14px;border-radius:10px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);">
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Name:</strong> ${name}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Email:</strong> ${email}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Phone:</strong> ${phone || "Not provided"}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Inquiry Type:</strong> ${inquiryType || "General"}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Subject:</strong> ${subject || "No subject"}</p>
+      </div>
+      <div style="margin-top:14px;padding:14px;border-radius:10px;background:#0f172a;border:1px solid rgba(148,163,184,0.25);">
+        <p style="margin:0 0 8px 0;font-size:13px;color:#94a3b8;">Message</p>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#e2e8f0;white-space:pre-line;">${message}</p>
+      </div>
+    `,
+    footer: `${appName} contact notification`,
+  });
+}
+
+export function getContactUserAckEmailTemplate({ name }) {
+  return baseTemplate({
+    title: "We received your message",
+    subtitle: `Thanks for contacting ${appName}`,
+    bodyHtml: `
+      <p style="margin:0 0 12px 0;font-size:15px;color:#cbd5e1;">Hi ${name || "there"},</p>
+      <p style="margin:0 0 12px 0;font-size:14px;color:#e2e8f0;line-height:1.6;">Thank you for filling out our contact form. Our team has received your request and will get back to you as soon as possible.</p>
+      <p style="margin:0;font-size:13px;color:#94a3b8;">If your issue is urgent, please use the emergency contact details on the website.</p>
+    `,
+    footer: `${appName} support team`,
+  });
+}

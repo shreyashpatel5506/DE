@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from './ui/badge';
 import { Phone, Mail, MapPin, Clock, Users, Shield, Wrench, Globe, MessageCircle, Send } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
+import { api } from '@/lib/api';
 
 const contactInfo = [
   {
@@ -120,20 +121,30 @@ export function ContactPage() {
     }
 
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    toast.success('Your message has been sent successfully! We\'ll get back to you within 24 hours.');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      inquiryType: '',
-      subject: '',
-      message: ''
-    });
-    setIsSubmitting(false);
+
+    try {
+      const response = await api.post('/api/contact', formData);
+      if (response.data?.success) {
+        toast.success(response.data.message || 'Message sent successfully.');
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          inquiryType: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        toast.error(response.data?.message || 'Failed to send your message');
+      }
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message ||
+          'Failed to send your message. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
