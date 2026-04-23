@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Shield, Users, Home, Info, Phone, Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { useAuth } from './AuthContext';
 import { useNotifications } from './NotificationContext';
 
@@ -12,7 +13,8 @@ interface NavigationProps {
 
 export function Navigation({ currentView, setCurrentView }: NavigationProps) {
   const { isLoggedIn, role, logout } = useAuth();
-  const { unreadCount, markAllRead } = useNotifications();
+  const { notifications, unreadCount, markAllRead, markRead, clearNotifications } = useNotifications();
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   const handleViewChange = (view: 'home' | 'citizen' | 'officer' | 'about' | 'contact') => {
     setCurrentView(view);
@@ -85,9 +87,9 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={markAllRead}
+                onClick={() => setIsNotificationsOpen(true)}
                 className="cursor-hit relative p-2"
-                title="Mark all notifications as read"
+                title="View notifications"
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
@@ -97,6 +99,62 @@ export function Navigation({ currentView, setCurrentView }: NavigationProps) {
                 )}
               </Button>
             )}
+
+            <Dialog
+              open={isNotificationsOpen}
+              onOpenChange={(open) => {
+                setIsNotificationsOpen(open);
+                if (open) markAllRead();
+              }}
+            >
+              <DialogContent className="sm:max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>All Notifications</DialogTitle>
+                  <DialogDescription>
+                    Updates for your reported issues.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-1">
+                  {notifications.length === 0 ? (
+                    <div className="rounded-md border px-4 py-8 text-center text-sm text-muted-foreground">
+                      No notifications yet.
+                    </div>
+                  ) : (
+                    notifications.map((n, index) => (
+                      <div
+                        key={`${n.id}-${index}`}
+                        className={`rounded-md border px-3 py-3 text-sm cursor-pointer ${n.read ? 'opacity-75' : 'bg-blue-500/5 border-blue-400/30'}`}
+                        onClick={() => markRead(n.id)}
+                        title="Mark as read"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium">{n.title || 'Issue Update'}</p>
+                            <p className="text-muted-foreground mt-1">{n.message}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              Report ID: {n.postId}
+                            </p>
+                          </div>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {new Date(n.at).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={markAllRead}>
+                    Mark all read
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={clearNotifications}>
+                    Clear all
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {isLoggedIn && (
               <Button

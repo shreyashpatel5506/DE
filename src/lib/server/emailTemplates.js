@@ -94,3 +94,35 @@ export function getContactUserAckEmailTemplate({ name }) {
     footer: `${appName} support team`,
   });
 }
+
+export function getIssueStatusUpdateEmailTemplate({
+  userName,
+  reportId,
+  title,
+  status,
+  category,
+  priority,
+  location,
+  description,
+}) {
+  return baseTemplate({
+    title: "Issue Status Updated",
+    subtitle: `Your CivicReport submission has a new status`,
+    bodyHtml: `
+      <p style="margin:0 0 12px 0;font-size:15px;color:#cbd5e1;">Hi ${userName || "Citizen"}, your report status has been updated.</p>
+      <div style="padding:14px;border-radius:10px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);">
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Report ID:</strong> ${reportId}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Title:</strong> ${title}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>New Status:</strong> ${status}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Category:</strong> ${category || "N/A"}</p>
+        <p style="margin:0 0 8px 0;font-size:13px;color:#e5e7eb;"><strong>Priority:</strong> ${priority || "N/A"}</p>
+        <p style="margin:0;font-size:13px;color:#e5e7eb;"><strong>Location:</strong> ${location || "N/A"}</p>
+      </div>
+      <div style="margin-top:14px;padding:14px;border-radius:10px;background:#0f172a;border:1px solid rgba(148,163,184,0.25);">
+        <p style="margin:0 0 8px 0;font-size:13px;color:#94a3b8;">Report details</p>
+        <p style="margin:0;font-size:14px;line-height:1.6;color:#e2e8f0;white-space:pre-line;">${description || "No description provided"}</p>
+      </div>
+    `,
+    footer: `${appName} issue status notifications`,
+  });
+}
