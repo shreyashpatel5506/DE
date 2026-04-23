@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectMongo } from "@/lib/server/db";
 import Otp from "@/lib/server/models/otp.model";
 import User from "@/lib/server/models/user.model";
+import { env } from "@/lib/server/env";
 import {
   findUserByEmail as findLocalUserByEmail,
   saveOtp as saveLocalOtp,
@@ -12,6 +13,18 @@ import { getOtpEmailTemplate } from "@/lib/server/emailTemplates";
 export async function POST(req) {
   try {
     const dbReady = await connectMongo();
+
+    if (!dbReady && env.NODE_ENV === "production") {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Database connection failed in production. Please set valid MONGODB_URI in Vercel environment variables.",
+        },
+        { status: 503 },
+      );
+    }
+
     const { email, purpose = "signup" } = await req.json();
 
     if (!email) {
